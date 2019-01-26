@@ -19,3 +19,5 @@
 `keyboard 0.13.2` [docs](https://github.com/boppreh/keyboard#api) [pip](https://pypi.org/project/keyboard/)
 
 `opencv 3.4.3.18` [docs](https://docs.opencv.org/master/) [pip](https://pypi.org/project/opencv-python/)
+
+`Tkinter` [docs](https://docs.python.org/3/library/tkinter.html) [pip](https://wiki.python.org/moin/TkInter)
