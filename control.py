@@ -29,39 +29,36 @@ def show_frame():
     lmain.configure(image=imgtk)
     lmain.after(10, show_frame)
 
-
+def movement():
+    if keyboard.is_pressed('return'):
+      drone.takeoff()
+      drone.hover()
+    elif keyboard.is_pressed('q'):
+      drone.land()
+    elif keyboard.is_pressed('w'):
+      drone.move(forward=0.1)
+    elif keyboard.is_pressed('s'):
+      drone.move(backward=0.1)
+    elif keyboard.is_pressed('a'):
+      drone.move(left=0.1)
+    elif keyboard.is_pressed('d'):
+      drone.move(right=0.1)
+    elif keyboard.is_pressed('e'):
+      drone.move(up=0.1)
+    elif keyboard.is_pressed('c'):
+      drone.move(down=0.1)
+    elif keyboard.is_pressed('z'):
+      drone.move(ccw=0.1)
+    elif keyboard.is_pressed('x'):
+      drone.move(cw=0.1)
+    window.after(1, movement)
 
 #Slider window (slider controls stage position)
 sliderFrame = tk.Frame(window, width=600, height=100)
 sliderFrame.grid(row = 600, column=0, padx=10, pady=2)
 
 
-show_frame()  #Display 2
-window.mainloop()  #Starts GUI
-# try:
-#   while True:
-#       print('hello')
-#       window.update()
-#       if keyboard.is_pressed('return'):
-#           drone.takeoff()
-#           drone.hover()
-#       elif keyboard.is_pressed('q'):
-#           drone.land()
-#       elif keyboard.is_pressed('w'):
-#           drone.move(forward=0.1)
-#       elif keyboard.is_pressed('s'):
-#           drone.move(backward=0.1)
-#       elif keyboard.is_pressed('a'):
-#           drone.move(left=0.1)
-#       elif keyboard.is_pressed('d'):
-#           drone.move(right=0.1)
-#       elif keyboard.is_pressed('e'):
-#           drone.move(up=0.1)
-#       elif keyboard.is_pressed('c'):
-#           drone.move(down=0.1)
-#       elif keyboard.is_pressed('z'):
-#           drone.move(ccw=0.1)
-#       elif keyboard.is_pressed('x'):
-#           drone.move(cw=0.1)
-# finally:
-#     drone.close()
+show_frame()
+window.after(1, movement)
+window.mainloop()
+drone.close()
