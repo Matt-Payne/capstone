@@ -21,3 +21,5 @@
 `opencv 3.4.3.18` [docs](https://docs.opencv.org/master/) [pip](https://pypi.org/project/opencv-python/)
 
 `Tkinter` [docs](https://docs.python.org/3/library/tkinter.html) [pip](https://wiki.python.org/moin/TkInter)
+
+`TensorFlow 1.12` [docs](https://www.tensorflow.org/api_docs) [pip](https://pypi.org/project/tensorflow/)
