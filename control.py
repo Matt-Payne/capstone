@@ -33,6 +33,7 @@ def show_frame():
     lmain.configure(image=imgtk)
     lmain.after(10, show_frame)
 
+# adapted from Adrian Rosebrock's article
 def cropText(img_path):
     image = cv2.imread(img_path)
     orig = image.copy()
@@ -121,11 +122,8 @@ def cropText(img_path):
         endX = int(endX * rW)
         endY = int(endY * rH)
 
-        # draw the bounding box on the image
-        cv2.rectangle(orig, (startX, startY), (endX, endY), (0, 255, 0), 2)
-
     # show the output image
-    cropped = orig[startY:endY, startX:endX]
+    cropped = orig[(startY+10):(endY+10), (startX+10):(endX+10)]
     filename = "cropped-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg"
     cv2.imwrite(filename, cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR))
     # cv2.imshow("Text Detection", cropped)
