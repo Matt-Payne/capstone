@@ -7,6 +7,8 @@ import keyboard
 import time
 from imutils.object_detection import non_max_suppression
 from main import ImageRec
+from imutils.video import VideoStream
+import imutils
 
 drone = ARDrone()
 drone.video_ready.wait()
@@ -22,11 +24,42 @@ window.config(background="#FFFFFF")
 imageFrame = tk.Frame(window, width=600, height=500)
 imageFrame.grid(row=0, column=0, padx=10, pady=2)
 
+find = ""
+
 #Capture video frames
 lmain = tk.Label(imageFrame)
 lmain.grid(row=3, column=2)
 def show_frame():
-    frame = drone.frame
+    global find
+    # frame = drone.frame
+    # cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+    # img = PIL.Image.fromarray(cv2image)
+    # imgtk = PIL.ImageTk.PhotoImage(image=img)
+    # lmain.imgtk = imgtk
+    # lmain.configure(image=imgtk)
+    # lmain.after(10, show_frame)
+    CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
+        "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+        "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
+        "sofa", "train", "tvmonitor"]
+    COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
+    net = cv2.dnn.readNetFromCaffe('MobileNetSSD_deploy.prototxt.txt', 'MobileNetSSD_deploy.caffemodel')
+    frame = imutils.resize(drone.frame, width=400)
+    (h, w) = frame.shape[:2]
+    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
+    net.setInput(blob)
+    detections = net.forward()
+    for i in np.arange(0, detections.shape[2]):
+        confidence = detections[0, 0, i, 2]
+        if confidence > 0.2:
+            idx = int(detections[0, 0, i, 1])
+            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            (startX, startY, endX, endY) = box.astype("int")
+            label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
+            if find and (CLASSES[idx] == find):
+                cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[idx], 2)
+                y = startY - 15 if startY - 15 > 15 else startY + 15
+                cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
     cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
     img = PIL.Image.fromarray(cv2image)
     imgtk = PIL.ImageTk.PhotoImage(image=img)
@@ -34,8 +67,10 @@ def show_frame():
     lmain.configure(image=imgtk)
     lmain.after(10, show_frame)
 
+
 # adapted from Adrian Rosebrock's article
 def cropText(img_path):
+    global find
     image = cv2.imread(img_path)
     orig = image.copy()
     (H, W) = image.shape[:2]
@@ -129,7 +164,9 @@ def cropText(img_path):
     cv2.imwrite(filename, cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR))
     i = ImageRec()
     # send cropped image to nn
-    i.main(filename)
+    (word, prob) = i.main(filename)
+    print(word)
+    find = word[0]
     # cv2.imshow("Text Detection", cropped)
     # cv2.waitKey(0)
 
@@ -138,34 +175,34 @@ def screenshot():
     cv2.imwrite(filename, cv2.cvtColor(drone.frame, cv2.COLOR_RGB2BGR))
     cropText(filename)
 
-# not working --- find out why
-def takeoff():
-    drone.takeoff()
-    drone.hover()
-    window.after(1, takeoff)
-
+# does not work
 def movement():
-    if keyboard.is_pressed('q'):
-      drone.land()
-    elif keyboard.is_pressed('w'):
-      drone.move(forward=0.1)
-    elif keyboard.is_pressed('s'):
-      drone.move(backward=0.1)
-    elif keyboard.is_pressed('a'):
-      drone.move(left=0.1)
-    elif keyboard.is_pressed('d'):
-      drone.move(right=0.1)
-    elif keyboard.is_pressed('e'):
-      drone.move(up=0.1)
-    elif keyboard.is_pressed('c'):
-      drone.move(down=0.1)
-    elif keyboard.is_pressed('z'):
-      drone.move(ccw=0.1)
-    elif keyboard.is_pressed('x'):
-      drone.move(cw=0.1)
+    if not drone.state.fly_mask:
+        # print("test")
+        drone.takeoff()
+        drone.hover()
+    else:
+        if keyboard.is_pressed('q'):
+          drone.land()
+        elif keyboard.is_pressed('w'):
+          drone.move(forward=0.1)
+        elif keyboard.is_pressed('s'):
+          drone.move(backward=0.1)
+        elif keyboard.is_pressed('a'):
+          drone.move(left=0.1)
+        elif keyboard.is_pressed('d'):
+          drone.move(right=0.1)
+        elif keyboard.is_pressed('e'):
+          drone.move(up=0.1)
+        elif keyboard.is_pressed('c'):
+          drone.move(down=0.1)
+        elif keyboard.is_pressed('z'):
+          drone.move(ccw=0.1)
+        elif keyboard.is_pressed('x'):
+          drone.move(cw=0.1)
     window.after(1, movement)
 
-btn_snapshot=tk.Button(window, text="Takeoff", width=25, command=takeoff)
+btn_snapshot=tk.Button(window, text="Takeoff", width=25, command=movement)
 btn_snapshot.grid(row = 2, column=0)
 btn_snapshot=tk.Button(window, text="Snapshot", width=25, command=screenshot)
 btn_snapshot.grid(row = 3, column=0)

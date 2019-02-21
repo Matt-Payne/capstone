@@ -94,8 +94,9 @@ class ImageRec:
         img = preprocess(cv2.imread(fnImg, cv2.IMREAD_GRAYSCALE), Model.imgSize)
         batch = Batch(None, [img])
         (recognized, probability) = model.inferBatch(batch, True)
-        print('Recognized:', '"' + recognized[0] + '"')
-        print('Probability:', probability[0])
+        # print('Recognized:', '"' + recognized[0] + '"')
+        # print('Probability:', probability[0])
+        return (recognized, probability)
 
 
     def main(self, image):
@@ -137,7 +138,7 @@ class ImageRec:
         else:
             print(open(FilePaths.fnAccuracy).read())
             model = Model(open(FilePaths.fnCharList).read(), decoderType, mustRestore=True)
-            self.infer(model, image)
+            return(self.infer(model, image))
 
 
 if __name__ == '__main__':
