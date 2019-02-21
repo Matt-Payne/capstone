@@ -166,7 +166,7 @@ def cropText(img_path):
     # send cropped image to nn
     (word, prob) = i.main(filename)
     print(word)
-    find = word[0]
+    find = word
     # cv2.imshow("Text Detection", cropped)
     # cv2.waitKey(0)
 

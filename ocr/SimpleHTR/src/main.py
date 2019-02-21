@@ -96,7 +96,7 @@ class ImageRec:
         (recognized, probability) = model.inferBatch(batch, True)
         # print('Recognized:', '"' + recognized[0] + '"')
         # print('Probability:', probability[0])
-        return (recognized, probability)
+        return (recognized[0], probability[0])
 
 
     def main(self, image):
