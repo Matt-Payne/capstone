@@ -143,4 +143,4 @@ class ImageRec:
 
 if __name__ == '__main__':
     i = ImageRec()
-    i.main()
+    i.main(FilePaths.fnInfer)
