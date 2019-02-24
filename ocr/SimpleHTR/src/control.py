@@ -44,7 +44,7 @@ def show_frame():
         "sofa", "train", "tvmonitor"]
     COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
     net = cv2.dnn.readNetFromCaffe('MobileNetSSD_deploy.prototxt.txt', 'MobileNetSSD_deploy.caffemodel')
-    frame = imutils.resize(drone.frame, width=400)
+    frame = imutils.resize(drone.frame, width=720)
     (h, w) = frame.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
     net.setInput(blob)
@@ -159,7 +159,7 @@ def cropText(img_path):
         endY = int(endY * rH)
 
     # show the output image
-    cropped = orig[(startY+10):(endY+10), (startX+10):(endX+10)]
+    cropped = orig[(startY-20):(endY+10), (startX+10):(endX+10)]
     filename = "cropped-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg"
     cv2.imwrite(filename, cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR))
     i = ImageRec()
@@ -179,8 +179,9 @@ def screenshot():
 def movement():
     if not drone.state.fly_mask:
         # print("test")
-        drone.takeoff()
-        drone.hover()
+        # drone.takeoff()
+        # drone.hover()
+        pass
     else:
         if keyboard.is_pressed('q'):
           drone.land()
