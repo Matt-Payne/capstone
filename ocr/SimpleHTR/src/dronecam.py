@@ -77,6 +77,17 @@ class DroneCam:
                         label = "{}: {:.2f}%".format(self.CLASSES[idx], confidence * 100)
                         if self.find and (self.CLASSES[idx] == self.find):
                             cv2.rectangle(self.frame, (startX, startY), (endX, endY), self.COLORS[idx], 2)
+
+                            #draw circle in center of object
+                            int ScreenWidth = 640
+                            int screenHeight = 480
+                            #get middle coords of object box
+                            x = int(((startX+endX)/2)*ScreenWidth)
+                            y = int(((startY+endY)/2)*screenHeight)
+
+                            #draw circle
+                            cv2.circle(self.frame,(x,y),5,(75,13,180),-1)
+                            
                             y = startY - 15 if startY - 15 > 15 else startY + 15
                             cv2.putText(self.frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, self.COLORS[idx], 2)
 
