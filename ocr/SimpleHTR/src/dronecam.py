@@ -48,6 +48,17 @@ class DroneCam:
 
         self.root.wm_title("Drone Cam")
         self.root.wm_protocol("WM_DELETE_WINDOW", self.onClose)
+    def getPixels(self):
+
+
+    def initFocalLength(self,pixels,distance,width):
+        focal = (pixels*distance)/width
+        return focal
+
+    def findDistance(self,focal,width,pixels):
+        distance = (width * focal)/pixels
+        return distance
+
 
     def videoLoop(self):
         try:
