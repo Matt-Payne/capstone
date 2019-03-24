@@ -24,10 +24,11 @@ class DroneCam:
         self.control_thread = None
         self.text_rec_thread = None
         self.stopEvent = None
-        self.find = ""
+        self.find = "bicycle"       # object current being looked for
         self.img_path = ""
-        self.focal_length = 548
-        self.distance = 0
+        self.focal_length = 548     # focal length of drone forward camera
+        self.distance = 0           # current distance from object in inches
+        self.land_distance = 24     # inches away from object to land
 
         self.root = tk.Tk()
         self.panel = None
@@ -39,6 +40,10 @@ class DroneCam:
             "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
             "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
             "sofa", "train", "tvmonitor"]
+        self.SIZES = [0, 0, 66, 0, 0,
+            2.5, 0, 0, 0, 18, 0, 0,
+            0, 0, 0, 0, 0, 0, 0,
+            45, 0, 0] # corresponding sizes of objects in array CLASSES
         self.COLORS = np.random.uniform(0, 255, size=(len(self.CLASSES), 3))
         self.net = cv2.dnn.readNetFromCaffe('MobileNetSSD_deploy.prototxt.txt', 'MobileNetSSD_deploy.caffemodel')
 
@@ -46,6 +51,7 @@ class DroneCam:
         self.video_thread = threading.Thread(target=self.videoLoop, args=())
         self.video_thread.start()
         self.control_thread = threading.Thread(target=self.inputLoop, args=())
+        # self.control_thread = threading.Thread(target=self.navigate, args=())
         self.control_thread.start()
 
         self.root.wm_title("Drone Cam")
@@ -81,7 +87,7 @@ class DroneCam:
                         label = "{}: {:.2f}%".format(self.CLASSES[idx], confidence * 100)
                         if self.find and (self.CLASSES[idx] == self.find):
                             cv2.rectangle(self.frame, (startX, startY), (endX, endY), self.COLORS[idx], 2)
-                            self.distance = self.findDistance(self.focal_length, 2.5, abs(startX-endX))
+                            self.distance = self.findDistance(self.focal_length, self.SIZES[idx], abs(startX-endX))
 
                             #draw circle in center of object
                             screenWidth = 640
@@ -90,11 +96,11 @@ class DroneCam:
                             x = int((startX+endX)/2)
                             y = int((startY+endY)/2)
 
-                            testBoxX = 120
-                            testBoxY = (640*(1/3))
+                            testBoxX = int(screenWidth / 3)
+                            testBoxY = int(screenHeight / 3)
                             #top left and bottom right of box
                             TL_test = (0,0)
-                            BR_test = (testBoxX,testBoxY)
+                            BR_test = (testBoxX, testBoxY)
                             #draw box
                             cv2.rectangle(self.frame,TL_test,BR_test,(20,20,255),3)
                             #draw circle in the center of object
@@ -118,6 +124,19 @@ class DroneCam:
 
         except RuntimeError:
             print("[INFO] caught a RuntimeError")
+
+
+    def navigate(self):
+        self.drone.takeoff()
+        self.drone.hover()
+        while not self.stopEvent.is_set():
+            if self.distance == 0:
+                self.drone.move(cw=0.1)
+            if self.distance > 24:
+                self.drone.move(forward=0.1)
+            if self.distance < 24 and self.distance != 0:
+                self.drone.land()
+
 
     def inputLoop(self):
         try:
