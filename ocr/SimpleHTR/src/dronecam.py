@@ -97,6 +97,21 @@ class DroneCam:
         BR_L_M_Box = (int(640/3),int(screenHeight*(2/3)))
         cv2.rectangle(self.frame,TL_L_M_Box,BR_L_M_Box,(0,0,0),3)
 
+        #middle middle box
+        TL_M_M_Box = (int(640/3),360/3)
+        BR_M_M_Box = (int(640*(2/3)),360*(2/3))
+        cv2.rectangle(self.frame,TL_L_M_Box,BR_L_M_Box,(51,204,51),3)
+
+        #middle right box
+        TL_R_M_Box = (int(640*(2/3)),360/3)
+        BR_R_M_Box = (640,360*(2/3))
+        cv2.rectangle(self.frame,TL_L_M_Box,BR_L_M_Box,(255, 153, 51),3)
+
+
+        #bottom left box
+        TL_L_L_Box = (int(360*(2/3)),0)
+        BR_L_L_Box = (360,int(screenWidth*(2/3)))
+        cv2.rectangle(self.frame,TL_L_L_Box,BR_L_L_Box,(102, 0, 51),3)
     def videoLoop(self):
         try:
             while not self.stopEvent.is_set():
