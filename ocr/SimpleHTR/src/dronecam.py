@@ -26,6 +26,8 @@ class DroneCam:
         self.stopEvent = None
         self.find = ""
         self.img_path = ""
+        self.focal_length = 548
+        self.distance = 0
 
         self.root = tk.Tk()
         self.panel = None
@@ -48,14 +50,16 @@ class DroneCam:
 
         self.root.wm_title("Drone Cam")
         self.root.wm_protocol("WM_DELETE_WINDOW", self.onClose)
+
+
     def getPixels(self):
+        return 0
 
+    def initFocalLength(self, pixels, distance, width):
+        focal = (pixels*distance)/width
+        return focal
 
-        def initFocalLength(self,pixels,distance,width):
-            focal = (pixels*distance)/width
-            return focal
-
-    def findDistance(self,focal,width,pixels):
+    def findDistance(self, focal, width, pixels):
         distance = (width * focal)/pixels
         return distance
 
@@ -77,16 +81,17 @@ class DroneCam:
                         label = "{}: {:.2f}%".format(self.CLASSES[idx], confidence * 100)
                         if self.find and (self.CLASSES[idx] == self.find):
                             cv2.rectangle(self.frame, (startX, startY), (endX, endY), self.COLORS[idx], 2)
+                            self.distance = self.findDistance(self.focal_length, 2.5, abs(startX-endX))
 
                             #draw circle in center of object
                             screenWidth = 640
                             screenHeight = 360
                             #get middle coords of object box
-                            x = int(((startX+endX)/2)*ScreenWidth)
-                            y = int(((startY+endY)/2)*screenHeight)
+                            x = int((startX+endX)/2)
+                            y = int((startY+endY)/2)
 
                             #draw circle
-                            cv2.circle(self.frame,(x,y),5,(75,13,180),-1)
+                            cv2.circle(self.frame, (x,y), 5, (75,13,180), -1)
 
                             y = startY - 15 if startY - 15 > 15 else startY + 15
                             cv2.putText(self.frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, self.COLORS[idx], 2)
