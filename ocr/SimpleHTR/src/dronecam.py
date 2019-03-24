@@ -90,7 +90,14 @@ class DroneCam:
                             x = int((startX+endX)/2)
                             y = int((startY+endY)/2)
 
-                            #draw circle
+                            testBoxX = 120
+                            testBoxY = (640*(1/3))
+                            #top left and bottom right of box
+                            TL_test = (0,0)
+                            BR_test = (testBoxX,testBoxY)
+                            #draw box
+                            cv2.rectangle(self.frame,TL_test,BR_test,(20,20,255),3)
+                            #draw circle in the center of object
                             cv2.circle(self.frame, (x,y), 5, (75,13,180), -1)
 
                             y = startY - 15 if startY - 15 > 15 else startY + 15
