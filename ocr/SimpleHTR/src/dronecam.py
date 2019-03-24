@@ -13,6 +13,7 @@ from imutils.object_detection import non_max_suppression
 from main import ImageRec
 import imutils
 import time
+from difflib import SequenceMatcher
 
 class DroneCam:
     def __init__(self):
@@ -29,6 +30,7 @@ class DroneCam:
         self.focal_length = 548     # focal length of drone forward camera
         self.distance = 0           # current distance from object in inches
         self.land_distance = 24     # inches away from object to land
+        self.ratio = 0.5            # ratio to match words
 
         self.root = tk.Tk()
         self.panel = None
@@ -69,7 +71,7 @@ class DroneCam:
         distance = (width * focal)/pixels
         return distance
 
-    def drawBoxes():
+    def drawBoxes(self):
         #draw circle in center of object
         screenWidth = 640
         screenHeight = 360
@@ -92,7 +94,7 @@ class DroneCam:
 
         #left middle box
         TL_L_M_Box = (0,int(screenHeight/3))
-        BR_L_M_Box = (int(640/3),int(screenHeight*(2/3))
+        BR_L_M_Box = (int(640/3),int(screenHeight*(2/3)))
         cv2.rectangle(self.frame,TL_L_M_Box,BR_L_M_Box,(0,0,0),3)
 
     def videoLoop(self):
@@ -110,7 +112,7 @@ class DroneCam:
                         box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                         (startX, startY, endX, endY) = box.astype("int")
                         label = "{}: {:.2f}%".format(self.CLASSES[idx], confidence * 100)
-                        if self.find and (self.CLASSES[idx] == self.find):
+                        if self.find and SequenceMatcher(self.CLASSES[idx],self.find).ratio > self.ratio:
                             cv2.rectangle(self.frame, (startX, startY), (endX, endY), self.COLORS[idx], 2)
                             self.distance = self.findDistance(self.focal_length, self.SIZES[idx], abs(startX-endX))
 
