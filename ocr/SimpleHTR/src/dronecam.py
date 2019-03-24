@@ -69,6 +69,31 @@ class DroneCam:
         distance = (width * focal)/pixels
         return distance
 
+    def drawBoxes():
+        #draw circle in center of object
+        screenWidth = 640
+        screenHeight = 360
+        testBoxX = int(screenWidth / 3)
+        testBoxY = int(screenHeight / 3)
+        #top left and bottom right of box
+        TL_test = (0,0)
+        BR_test = (testBoxX, testBoxY)
+        #draw box
+        cv2.rectangle(self.frame,TL_test,BR_test,(20,20,255),3)
+
+        TL_M_Box=(testBoxX,0)
+        BR_M_Box=(int(screenWidth*(2/3)),testBoxY)
+        #top middle box
+        cv2.rectangle(self.frame,TL_M_Box,BR_M_Box,(255,20,20),3)
+        #top right box
+        TL_R_Box = (int(640*(2/3)),0)
+        BR_R_Box = (640,int(screenHeight/3))
+        cv2.rectangle(self.frame,TL_R_Box,BR_R_Box,(0,255,255),3)
+
+        #left middle box
+        TL_L_M_Box = (0,int(screenHeight/3))
+        BR_L_M_Box = (int(640/3),int(screenHeight*(2/3))
+        cv2.rectangle(self.frame,TL_L_M_Box,BR_L_M_Box,(0,0,0),3)
 
     def videoLoop(self):
         try:
@@ -96,13 +121,7 @@ class DroneCam:
                             x = int((startX+endX)/2)
                             y = int((startY+endY)/2)
 
-                            testBoxX = int(screenWidth / 3)
-                            testBoxY = int(screenHeight / 3)
-                            #top left and bottom right of box
-                            TL_test = (0,0)
-                            BR_test = (testBoxX, testBoxY)
-                            #draw box
-                            cv2.rectangle(self.frame,TL_test,BR_test,(20,20,255),3)
+                            self.drawBoxes()
                             #draw circle in the center of object
                             cv2.circle(self.frame, (x,y), 5, (75,13,180), -1)
 
