@@ -60,7 +60,7 @@ class DroneCam:
         self.BR_M_L_Box = None
 
         self.TL_R_L_Box = None
-        self.BR_R_L_Box = None 
+        self.BR_R_L_Box = None
 
         btn = tk.Button(self.root, text="screenshot", command=self.takeSnapshot)
         btn.pack(side="bottom", fill="both", expand="yes", padx=10, pady=10)
@@ -106,46 +106,65 @@ class DroneCam:
 
         #top left box
         TL_test = (0,0)
+        self.TL_test = TL_test
         BR_test = (testBoxX, testBoxY)
+        self.BR_test = BR_test
         cv2.rectangle(self.frame,TL_test,BR_test,(20,20,255),3)
 
         #top middle box
         TL_M_Box=(testBoxX,0)
+        self.TL_M_Box = TL_M_Box
         BR_M_Box=(int(screenWidth*(2/3)),testBoxY)
+        self.BR_M_Box = BR_M_Box
         cv2.rectangle(self.frame,TL_M_Box,BR_M_Box,(255,20,20),3)
 
         #top right box
         TL_R_Box = (int(640*(2/3)),0)
+        self.TL_R_Box = TL_R_Box
         BR_R_Box = (640,int(screenHeight/3))
+        self.BR_R_Box = BR_R_Box
         cv2.rectangle(self.frame,TL_R_Box,BR_R_Box,(0,255,255),3)
 
         #left middle box
         TL_L_M_Box = (0,int(screenHeight/3))
+        self.TL_L_M_Box = TL_L_M_Box
         BR_L_M_Box = (int(640/3),int(screenHeight*(2/3)))
+        self.BR_L_M_Box = BR_L_M_Box
         cv2.rectangle(self.frame,TL_L_M_Box,BR_L_M_Box,(0,0,0),3)
 
         #middle middle box
         TL_M_M_Box = (int(640/3),int(360/3))
+        self.TL_M_M_Box = TL_M_M_Box
         BR_M_M_Box = (int(640*(2/3)),int(360*(2/3)))
+        self.BR_M_M_Box = BR_M_M_Box
         cv2.rectangle(self.frame,TL_M_M_Box,BR_M_M_Box,(51,204,51),3)
 
         #middle right box
         TL_R_M_Box = (int(640*(2/3)),int(360/3))
+        self.TL_R_M_Box = TL_R_M_Box
         BR_R_M_Box = (640,int(360*(2/3)))
+        self.BR_R_M_Box = BR_R_M_Box
         cv2.rectangle(self.frame,TL_R_M_Box,BR_R_M_Box,(255, 153, 51),3)
 
         #bottom left box
         TL_L_L_Box = (0,int(360*(2/3)))
+        self.TL_L_L_Box = TL_L_L_Box
         BR_L_L_Box = (int(screenWidth*(1/3)), 360)
+        self.BR_L_L_Box = BR_L_L_Box
         cv2.rectangle(self.frame,TL_L_L_Box,BR_L_L_Box,(102, 0, 51),3)
 
         #bottom middle box
         TL_M_L_Box = (int(screenWidth*(1/3)),int(screenHeight*(2/3)))
+        self.TL_M_L_Box = TL_M_L_Box
         BR_M_L_Box = (int(screenWidth*(2/3)),screenHeight)
+        self.BR_M_L_Box = BR_M_L_Box
         cv2.rectangle(self.frame,TL_M_L_Box,BR_M_L_Box,(255, 255, 255),3)
+
         #bottom right box
         TL_R_L_Box = (int(screenWidth*(2/3)),int(screenHeight*(2/3)))
+        self.TL_R_L_Box = TL_R_L_Box
         BR_R_L_Box = (screenWidth,screenHeight)
+        self.BR_R_L_Box = BR_R_L_Box
         cv2.rectangle(self.frame,TL_R_L_Box,BR_R_L_Box,(0, 204, 0),3)
 
 
