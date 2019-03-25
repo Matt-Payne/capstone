@@ -72,21 +72,21 @@ class DroneCam:
         return distance
 
     def drawBoxes(self):
-        #draw circle in center of object
         screenWidth = 640
         screenHeight = 360
         testBoxX = int(screenWidth / 3)
         testBoxY = int(screenHeight / 3)
-        #top left and bottom right of box
+
+        #top left box
         TL_test = (0,0)
         BR_test = (testBoxX, testBoxY)
-        #draw box
         cv2.rectangle(self.frame,TL_test,BR_test,(20,20,255),3)
 
+        #top middle box
         TL_M_Box=(testBoxX,0)
         BR_M_Box=(int(screenWidth*(2/3)),testBoxY)
-        #top middle box
         cv2.rectangle(self.frame,TL_M_Box,BR_M_Box,(255,20,20),3)
+
         #top right box
         TL_R_Box = (int(640*(2/3)),0)
         BR_R_Box = (640,int(screenHeight/3))
@@ -98,24 +98,25 @@ class DroneCam:
         cv2.rectangle(self.frame,TL_L_M_Box,BR_L_M_Box,(0,0,0),3)
 
         #middle middle box
-        TL_M_M_Box = (int(640/3),360/3)
-        BR_M_M_Box = (int(640*(2/3)),360*(2/3))
-        cv2.rectangle(self.frame,TL_L_M_Box,BR_L_M_Box,(51,204,51),3)
+        TL_M_M_Box = (int(640/3),int(360/3))
+        BR_M_M_Box = (int(640*(2/3)),int(360*(2/3)))
+        cv2.rectangle(self.frame,TL_M_M_Box,BR_M_M_Box,(51,204,51),3)
 
         #middle right box
-        TL_R_M_Box = (int(640*(2/3)),360/3)
-        BR_R_M_Box = (640,360*(2/3))
-        cv2.rectangle(self.frame,TL_L_M_Box,BR_L_M_Box,(255, 153, 51),3)
-
+        TL_R_M_Box = (int(640*(2/3)),int(360/3))
+        BR_R_M_Box = (640,int(360*(2/3)))
+        cv2.rectangle(self.frame,TL_R_M_Box,BR_R_M_Box,(255, 153, 51),3)
 
         #bottom left box
-        TL_L_L_Box = (int(360*(2/3)),0)
-        BR_L_L_Box = (360,int(screenWidth*(2/3)))
+        TL_L_L_Box = (0,int(360*(2/3)))
+        BR_L_L_Box = (int(screenWidth*(1/3)), 360)
         cv2.rectangle(self.frame,TL_L_L_Box,BR_L_L_Box,(102, 0, 51),3)
+
     def videoLoop(self):
         try:
             while not self.stopEvent.is_set():
                 self.frame = self.drone.frame
+                self.drawBoxes()
                 self.blob = cv2.dnn.blobFromImage(cv2.resize(self.frame, (300, 300)), 0.007843, (300, 300), 127.5)
                 self.net.setInput(self.blob)
                 (h, w) = self.frame.shape[:2]
@@ -127,7 +128,7 @@ class DroneCam:
                         box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                         (startX, startY, endX, endY) = box.astype("int")
                         label = "{}: {:.2f}%".format(self.CLASSES[idx], confidence * 100)
-                        if self.find and SequenceMatcher(self.CLASSES[idx],self.find).ratio > self.ratio:
+                        if self.find and SequenceMatcher(None, self.CLASSES[idx],self.find).ratio() > self.ratio:
                             cv2.rectangle(self.frame, (startX, startY), (endX, endY), self.COLORS[idx], 2)
                             self.distance = self.findDistance(self.focal_length, self.SIZES[idx], abs(startX-endX))
 
@@ -138,7 +139,6 @@ class DroneCam:
                             x = int((startX+endX)/2)
                             y = int((startY+endY)/2)
 
-                            self.drawBoxes()
                             #draw circle in the center of object
                             cv2.circle(self.frame, (x,y), 5, (75,13,180), -1)
 
