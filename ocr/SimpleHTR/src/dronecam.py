@@ -35,6 +35,33 @@ class DroneCam:
         self.root = tk.Tk()
         self.panel = None
 
+        self.TL_test = None
+        self.BR_test = None
+
+        self.TL_M_Box = None
+        self.BR_M_Box = None
+
+        self.TL_R_Box = None
+        self.BR_R_Box = None
+
+        self.TL_L_M_Box = None
+        self.BR_L_M_Box = None
+
+        self.TL_M_M_Box = None
+        self.BR_M_M_Box = None
+
+        self.TL_R_M_Box = None
+        self.BR_R_M_Box = None
+
+        self.TL_L_L_Box = None
+        self.BR_L_L_Box = None
+
+        self.TL_M_L_Box = None
+        self.BR_M_L_Box = None
+
+        self.TL_R_L_Box = None
+        self.BR_R_L_Box = None 
+
         btn = tk.Button(self.root, text="screenshot", command=self.takeSnapshot)
         btn.pack(side="bottom", fill="both", expand="yes", padx=10, pady=10)
 
@@ -111,6 +138,16 @@ class DroneCam:
         TL_L_L_Box = (0,int(360*(2/3)))
         BR_L_L_Box = (int(screenWidth*(1/3)), 360)
         cv2.rectangle(self.frame,TL_L_L_Box,BR_L_L_Box,(102, 0, 51),3)
+
+        #bottom middle box
+        TL_M_L_Box = (int(screenWidth*(1/3)),int(screenHeight*(2/3)))
+        BR_M_L_Box = (int(screenWidth*(2/3)),screenHeight)
+        cv2.rectangle(self.frame,TL_M_L_Box,BR_M_L_Box,(255, 255, 255),3)
+        #bottom right box
+        TL_R_L_Box = (int(screenWidth*(2/3)),int(screenHeight*(2/3)))
+        BR_R_L_Box = (screenWidth,screenHeight)
+        cv2.rectangle(self.frame,TL_R_L_Box,BR_R_L_Box,(0, 204, 0),3)
+
 
     def videoLoop(self):
         try:
