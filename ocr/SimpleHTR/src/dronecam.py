@@ -55,6 +55,8 @@ class DroneCam:
         self.stopEvent = threading.Event()
         self.video_thread = threading.Thread(target=self.videoLoop, args=())
         self.video_thread.start()
+        self.center_thread = threading.Thread(target=self.centerDrone, args=())
+        self.center_thread.start()
         self.control_thread = threading.Thread(target=self.navigate, args=())
         self.control_thread.start()
 
@@ -125,13 +127,12 @@ class DroneCam:
             if self.distance == 0:
                 self.drone.move(cw=0.1)
             else:
-                if self.centered:
+                while self.centered:
                     if self.distance > self.land_distance:
                         self.drone.move(forward=0.1)
                     if self.distance < self.land_distance and self.distance != 0:
+                        print("land")
                         self.drone.land()
-                else:
-                    self.centerDrone()
 
     def centerDrone(self):
         screenWidth = 640
@@ -141,7 +142,7 @@ class DroneCam:
         left_col_X_bound = int(screenWidth*(1/3))
         middle_col_X_bound = int(screenWidth*(2/3))
 
-        while not self.centered:
+        while not self.stopEvent.is_set():
             print(self.distance)
             if self.x != 0 and self.y != 0:
                 if self.y < top_row_Y_bound: # in top row
