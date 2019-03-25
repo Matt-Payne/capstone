@@ -31,36 +31,12 @@ class DroneCam:
         self.distance = 0           # current distance from object in inches
         self.land_distance = 24     # inches away from object to land
         self.ratio = 0.5            # ratio to match words
+        self.x = 0
+        self.y = 0
+        self.centered = False
 
         self.root = tk.Tk()
         self.panel = None
-
-        self.TL_test = None
-        self.BR_test = None
-
-        self.TL_M_Box = None
-        self.BR_M_Box = None
-
-        self.TL_R_Box = None
-        self.BR_R_Box = None
-
-        self.TL_L_M_Box = None
-        self.BR_L_M_Box = None
-
-        self.TL_M_M_Box = None
-        self.BR_M_M_Box = None
-
-        self.TL_R_M_Box = None
-        self.BR_R_M_Box = None
-
-        self.TL_L_L_Box = None
-        self.BR_L_L_Box = None
-
-        self.TL_M_L_Box = None
-        self.BR_M_L_Box = None
-
-        self.TL_R_L_Box = None
-        self.BR_R_L_Box = None
 
         btn = tk.Button(self.root, text="screenshot", command=self.takeSnapshot)
         btn.pack(side="bottom", fill="both", expand="yes", padx=10, pady=10)
@@ -79,100 +55,22 @@ class DroneCam:
         self.stopEvent = threading.Event()
         self.video_thread = threading.Thread(target=self.videoLoop, args=())
         self.video_thread.start()
-        self.control_thread = threading.Thread(target=self.inputLoop, args=())
-        # self.control_thread = threading.Thread(target=self.navigate, args=())
+        self.control_thread = threading.Thread(target=self.navigate, args=())
         self.control_thread.start()
 
         self.root.wm_title("Drone Cam")
         self.root.wm_protocol("WM_DELETE_WINDOW", self.onClose)
 
 
-    def getPixels(self):
-        return 0
-
-    def initFocalLength(self, pixels, distance, width):
-        focal = (pixels*distance)/width
-        return focal
-
     def findDistance(self, focal, width, pixels):
         distance = (width * focal)/pixels
         return distance
-
-    def drawBoxes(self):
-        screenWidth = 640
-        screenHeight = 360
-        testBoxX = int(screenWidth / 3)
-        testBoxY = int(screenHeight / 3)
-
-        #top left box
-        TL_test = (0,0)
-        self.TL_test = TL_test
-        BR_test = (testBoxX, testBoxY)
-        self.BR_test = BR_test
-        cv2.rectangle(self.frame,TL_test,BR_test,(20,20,255),3)
-
-        #top middle box
-        TL_M_Box=(testBoxX,0)
-        self.TL_M_Box = TL_M_Box
-        BR_M_Box=(int(screenWidth*(2/3)),testBoxY)
-        self.BR_M_Box = BR_M_Box
-        cv2.rectangle(self.frame,TL_M_Box,BR_M_Box,(255,20,20),3)
-
-        #top right box
-        TL_R_Box = (int(640*(2/3)),0)
-        self.TL_R_Box = TL_R_Box
-        BR_R_Box = (640,int(screenHeight/3))
-        self.BR_R_Box = BR_R_Box
-        cv2.rectangle(self.frame,TL_R_Box,BR_R_Box,(0,255,255),3)
-
-        #left middle box
-        TL_L_M_Box = (0,int(screenHeight/3))
-        self.TL_L_M_Box = TL_L_M_Box
-        BR_L_M_Box = (int(640/3),int(screenHeight*(2/3)))
-        self.BR_L_M_Box = BR_L_M_Box
-        cv2.rectangle(self.frame,TL_L_M_Box,BR_L_M_Box,(0,0,0),3)
-
-        #middle middle box
-        TL_M_M_Box = (int(640/3),int(360/3))
-        self.TL_M_M_Box = TL_M_M_Box
-        BR_M_M_Box = (int(640*(2/3)),int(360*(2/3)))
-        self.BR_M_M_Box = BR_M_M_Box
-        cv2.rectangle(self.frame,TL_M_M_Box,BR_M_M_Box,(51,204,51),3)
-
-        #middle right box
-        TL_R_M_Box = (int(640*(2/3)),int(360/3))
-        self.TL_R_M_Box = TL_R_M_Box
-        BR_R_M_Box = (640,int(360*(2/3)))
-        self.BR_R_M_Box = BR_R_M_Box
-        cv2.rectangle(self.frame,TL_R_M_Box,BR_R_M_Box,(255, 153, 51),3)
-
-        #bottom left box
-        TL_L_L_Box = (0,int(360*(2/3)))
-        self.TL_L_L_Box = TL_L_L_Box
-        BR_L_L_Box = (int(screenWidth*(1/3)), 360)
-        self.BR_L_L_Box = BR_L_L_Box
-        cv2.rectangle(self.frame,TL_L_L_Box,BR_L_L_Box,(102, 0, 51),3)
-
-        #bottom middle box
-        TL_M_L_Box = (int(screenWidth*(1/3)),int(screenHeight*(2/3)))
-        self.TL_M_L_Box = TL_M_L_Box
-        BR_M_L_Box = (int(screenWidth*(2/3)),screenHeight)
-        self.BR_M_L_Box = BR_M_L_Box
-        cv2.rectangle(self.frame,TL_M_L_Box,BR_M_L_Box,(255, 255, 255),3)
-
-        #bottom right box
-        TL_R_L_Box = (int(screenWidth*(2/3)),int(screenHeight*(2/3)))
-        self.TL_R_L_Box = TL_R_L_Box
-        BR_R_L_Box = (screenWidth,screenHeight)
-        self.BR_R_L_Box = BR_R_L_Box
-        cv2.rectangle(self.frame,TL_R_L_Box,BR_R_L_Box,(0, 204, 0),3)
 
 
     def videoLoop(self):
         try:
             while not self.stopEvent.is_set():
                 self.frame = self.drone.frame
-                self.drawBoxes()
                 self.blob = cv2.dnn.blobFromImage(cv2.resize(self.frame, (300, 300)), 0.007843, (300, 300), 127.5)
                 self.net.setInput(self.blob)
                 (h, w) = self.frame.shape[:2]
@@ -192,11 +90,11 @@ class DroneCam:
                             screenWidth = 640
                             screenHeight = 360
                             #get middle coords of object box
-                            x = int((startX+endX)/2)
-                            y = int((startY+endY)/2)
+                            self.x = int((startX+endX)/2)
+                            self.y = int((startY+endY)/2)
 
                             #draw circle in the center of object
-                            cv2.circle(self.frame, (x,y), 5, (75,13,180), -1)
+                            cv2.circle(self.frame, (self.x,self.y), 5, (75,13,180), -1)
 
                             y = startY - 15 if startY - 15 > 15 else startY + 15
                             cv2.putText(self.frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, self.COLORS[idx], 2)
@@ -219,43 +117,76 @@ class DroneCam:
 
 
     def navigate(self):
-        self.drone.takeoff()
-        self.drone.hover()
+        # self.drone.takeoff()
+        # self.drone.hover()
         while not self.stopEvent.is_set():
+            if keyboard.is_pressed('q'):
+                    self.drone.land()
             if self.distance == 0:
                 self.drone.move(cw=0.1)
-            if self.distance > 24:
-                self.drone.move(forward=0.1)
-            if self.distance < 24 and self.distance != 0:
-                self.drone.land()
+            else:
+                if self.centered:
+                    if self.distance > self.land_distance:
+                        self.drone.move(forward=0.1)
+                    if self.distance < self.land_distance and self.distance != 0:
+                        self.drone.land()
+                else:
+                    self.centerDrone()
 
+    def centerDrone(self):
+        screenWidth = 640
+        screenHeight = 360
+        top_row_Y_bound = int(screenHeight*(1/3))
+        mid_row_Y_bound = int(screenHeight*(2/3))
+        left_col_X_bound = int(screenWidth*(1/3))
+        middle_col_X_bound = int(screenWidth*(2/3))
 
-    def inputLoop(self):
-        try:
-            while not self.stopEvent.is_set():
-                if keyboard.is_pressed('q'):
-                    self.drone.land()
-                elif keyboard.is_pressed('p'):
-                    self.drone.takeoff()
-                    self.drone.hover()
-                elif keyboard.is_pressed('w'):
-                    self.drone.move(forward=0.1)
-                elif keyboard.is_pressed('s'):
-                    self.drone.move(backward=0.1)
-                elif keyboard.is_pressed('a'):
-                    self.drone.move(left=0.1)
-                elif keyboard.is_pressed('d'):
-                    self.drone.move(right=0.1)
-                elif keyboard.is_pressed('e'):
-                    self.drone.move(up=0.1)
-                elif keyboard.is_pressed('c'):
-                    self.drone.move(down=0.1)
-                elif keyboard.is_pressed('z'):
-                    self.drone.move(ccw=0.1)
-                elif keyboard.is_pressed('x'):
-                    self.drone.move(cw=0.1)
-        except RuntimeError:
-            print("[INFO] caught a runtime error")
+        while not self.centered:
+            print(self.distance)
+            if self.x != 0 and self.y != 0:
+                if self.y < top_row_Y_bound: # in top row
+                    if self.x < left_col_X_bound:
+                        print("top left")
+                        self.centered = False
+                        self.drone.move(left=0.1)
+                        self.drone.move(up=0.1)
+                    elif self.x < middle_col_X_bound:
+                        print("top middle")
+                        self.centered = False
+                        self.drone.move(up=0.1)
+                    else:
+                        print("top right")
+                        self.centered = False
+                        self.drone.move(right=0.1)
+                        self.drone.move(up=0.1)
+                elif self.y < mid_row_Y_bound: # in mid row
+                    if self.x < left_col_X_bound:
+                        print("mid left")
+                        self.centered = False
+                        self.drone.move(left=0.1)
+                    elif self.x < middle_col_X_bound:
+                        print("mid middle")
+                        self.centered = True
+                    else:
+                        print("mid right")
+                        self.centered = False
+                        self.drone.move(right=0.1)
+                else: # in bottom row
+                    if self.x < left_col_X_bound:
+                        print("bottom left")
+                        self.centered = False
+                        self.drone.move(left=0.1)
+                        self.drone.move(up=0.1)
+                    elif self.x < middle_col_X_bound:
+                        print("bottom middle")
+                        self.centered = False
+                        self.drone.move(up=0.1)
+                    else:
+                        print("bottom right")
+                        self.centered = False
+                        self.drone.move(right=0.1)
+                        self.drone.move(up=0.1)
+
 
     # adapted from Adrian Rosebrock's article
     def cropText(self):
