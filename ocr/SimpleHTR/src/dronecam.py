@@ -26,7 +26,7 @@ class DroneCam:
         self.control_thread = None
         self.text_rec_thread = None
         self.stopEvent = None
-        self.find = "bicycle"       # object current being looked for
+        self.find = "bicycle"              # object current being looked for
         self.img_path = ""
         self.focal_length = 548     # focal length of drone forward camera
         self.distance = 0           # current distance from object in inches
@@ -86,7 +86,8 @@ class DroneCam:
                         box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                         (startX, startY, endX, endY) = box.astype("int")
                         label = "{}: {:.2f}%".format(self.CLASSES[idx], confidence * 100)
-                        if self.find and SequenceMatcher(None, self.CLASSES[idx],self.find).ratio() > self.ratio:
+                        if self.find and SequenceMatcher(None, self.CLASSES[idx], self.find).ratio() > self.ratio:
+                            self.find = self.CLASSES[idx]
                             cv2.rectangle(self.frame, (startX, startY), (endX, endY), self.COLORS[idx], 2)
                             self.box_size = abs(startX-endX)
                             self.distance = self.findDistance(self.focal_length, self.SIZES[idx], self.box_size)
@@ -122,26 +123,30 @@ class DroneCam:
 
 
     def navigate(self):
-        self.drone.takeoff()
-        self.drone.hover()
         while not self.stopEvent.is_set():
-            if keyboard.is_pressed('q'):
-                    self.drone.land()
-            if self.distance == 0:
-                self.drone.move(cw=0.1)
-                self.drone.move(left=0.1)
-            else:
-                while self.centered:
-                    if self.distance > self.land_distance:
-                        self.drone.move(forward=0.1)
-                    if self.distance < self.land_distance and self.distance != 0:
-                        print("land")
-                        self.drone.move(backward=0.1)
-                        self.drone.land()
-                    if self.box_size > 600:
-                        print("too close")
-                        self.drone.move(backward=0.1)
-                        self.drone.land()
+            if self.find:
+                if not self.drone.state.fly_mask:
+                    print("taking off...")
+                    self.drone.takeoff()
+                    self.drone.hover()
+                else:
+                    if keyboard.is_pressed('q'):
+                            self.drone.land()
+                    if self.distance == 0:
+                        self.drone.move(cw=0.1)
+                        self.drone.move(left=0.1)
+                    else:
+                        while self.centered:
+                            if self.distance > self.land_distance:
+                                self.drone.move(forward=0.1)
+                            if self.distance < self.land_distance and self.distance != 0:
+                                print("land")
+                                self.drone.move(backward=0.1)
+                                self.drone.land()
+                            if self.box_size > 600:
+                                print("too close")
+                                self.drone.move(backward=0.1)
+                                self.drone.land()
 
     def centerDrone(self):
         screenWidth = 640
@@ -152,7 +157,8 @@ class DroneCam:
         middle_col_X_bound = int(screenWidth*(2/3))
 
         while not self.stopEvent.is_set():
-            print("distance to object: {:.2f} inches".format(self.distance))
+            if self.find:
+                print("distance to object: {:.2f} inches".format(self.distance))
             if self.x != 0 and self.y != 0:
                 if self.y < top_row_Y_bound: # in top row
                     if self.x < left_col_X_bound:
@@ -297,12 +303,13 @@ class DroneCam:
         # show the output image
         cropped = orig[(self.startY):(self.endY), (self.startX):(self.endX)]
         filename = "cropped-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg"
-        cv2.imwrite(filename, cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR))
+        cv2.imwrite(filename, cropped)
         i = ImageRec()
         # send cropped image to nn
         (word, prob) = i.main(filename)
         self.find = word
         print(self.find)
+        print(self.find, file=open("output.txt", "a"))
         # cv2.imshow("Text Detection", cropped)
         # cv2.waitKey(0)
 
