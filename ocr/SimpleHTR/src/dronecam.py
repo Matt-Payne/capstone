@@ -26,16 +26,17 @@ class DroneCam:
         self.control_thread = None
         self.text_rec_thread = None
         self.stopEvent = None
-        self.find = "bicycle"              # object current being looked for
+        self.find = ""              # object current being looked for
         self.img_path = ""
         self.focal_length = 548     # focal length of drone forward camera
         self.distance = 0           # current distance from object in inches
-        self.land_distance = 36     # inches away from object to land
+        self.land_distance = 84     # inches away from object to land
         self.ratio = 0.5            # ratio to match words
         self.x = 0
         self.y = 0
         self.centered = False
         self.box_size = 0
+        self.takeoff = True
 
         self.root = tk.Tk()
         self.panel = None
@@ -48,7 +49,7 @@ class DroneCam:
             "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
             "sofa", "train", "tvmonitor"]
         self.SIZES = [0, 0, 66, 0, 0,
-            2.5, 0, 0, 0, 18, 0, 0,
+            2.5, 0, 0, 0, 45, 0, 0,
             0, 0, 0, 0, 0, 0,
             45, 0, 0] # corresponding sizes of objects in array CLASSES
         self.COLORS = np.random.uniform(0, 255, size=(len(self.CLASSES), 3))
@@ -125,13 +126,14 @@ class DroneCam:
     def navigate(self):
         while not self.stopEvent.is_set():
             if self.find:
-                if not self.drone.state.fly_mask:
+                if not self.drone.state.fly_mask and self.takeoff:
                     print("taking off...")
                     self.drone.takeoff()
                     self.drone.hover()
                 else:
                     if keyboard.is_pressed('q'):
                             self.drone.land()
+                            self.takeoff = False
                     if self.distance == 0:
                         self.drone.move(cw=0.1)
                         self.drone.move(left=0.1)
@@ -141,11 +143,9 @@ class DroneCam:
                                 self.drone.move(forward=0.1)
                             if self.distance < self.land_distance and self.distance != 0:
                                 print("land")
-                                self.drone.move(backward=0.1)
                                 self.drone.land()
-                            if self.box_size > 600:
+                            if self.box_size > 500:
                                 print("too close")
-                                self.drone.move(backward=0.1)
                                 self.drone.land()
 
     def centerDrone(self):
@@ -244,9 +244,7 @@ class DroneCam:
         self.endX   = 0
 
         for y in range(0, numRows):
-            # extract the scores (probabilities), followed by the geometrical
-            # data used to derive potential bounding box coordinates that
-            # surround text
+            # derive potential bounding box coordinates that surround text
             scoresData = scores[0, 0, y]
             xData0 = geometry[0, 0, y]
             xData1 = geometry[0, 1, y]
@@ -256,7 +254,7 @@ class DroneCam:
 
             # loop over the number of columns
             for x in range(0, numCols):
-                # if our score does not have sufficient probability, ignore it
+                # if probability not sufficient ignore it
                 if scoresData[x] < 0.5:
                     continue
 
@@ -264,14 +262,12 @@ class DroneCam:
                 # be 4x smaller than the input image
                 (offsetX, offsetY) = (x * 4.0, y * 4.0)
 
-                # extract the rotation angle for the prediction and then
-                # compute the sin and cosine
+                # calc the rotation angle
                 angle = anglesData[x]
                 cos = np.cos(angle)
                 sin = np.sin(angle)
 
-                # use the geometry volume to derive the width and height of
-                # the bounding box
+                # derive the width and height of the bounding box
                 h = xData0[x] + xData2[x]
                 w = xData1[x] + xData3[x]
 
@@ -282,19 +278,16 @@ class DroneCam:
                 self.startX = int(self.endX - w)
                 self.startY = int(self.endY - h)
 
-                # add the bounding box coordinates and probability score to
-                # our respective lists
+                # add the bounding box coordinates and probability score
                 rects.append((self.startX, self.startY, self.endX, self.endY))
                 confidences.append(scoresData[x])
 
-        # apply non-maxima suppression to suppress weak, overlapping bounding
-        # boxes
+        # apply non-maxima suppression to suppress overlapping bounding boxes
         boxes = non_max_suppression(np.array(rects), probs=confidences)
 
         # loop over the bounding boxes
         for (startX, startY, endX, endY) in boxes:
-            # scale the bounding box coordinates based on the respective
-            # ratios
+            # scale the bounding box coordinates based on the ratios
             self.startX = int(startX * rW)
             self.startY = int(startY * rH)
             self.endX = int(endX * rW)
@@ -310,8 +303,6 @@ class DroneCam:
         self.find = word
         print(self.find)
         print(self.find, file=open("output.txt", "a"))
-        # cv2.imshow("Text Detection", cropped)
-        # cv2.waitKey(0)
 
     def takeSnapshot(self):
         ts = datetime.datetime.now()
