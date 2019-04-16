@@ -1,6 +1,7 @@
 # capstone
 ## list of main files
 `ocr/SimpleHTR/src/dronecam.py` = script that creates gui to interface with drone, contains methods to:
+
   - `findDistance`  = takes parameters focal, width, pixels
   - `videoLoop`     = updates frames from drone and processes image
   - `navigate`      = algorithm to navigate drone towards object
