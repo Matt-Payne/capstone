@@ -1,3 +1,5 @@
+[source repo](https://github.com/githubharald/SimpleHTR)
+
 # Handwritten Text Recognition with TensorFlow
 
 Handwritten Text Recognition (HTR) system implemented with TensorFlow (TF) and trained on the IAM off-line HTR dataset.
@@ -65,7 +67,7 @@ Beam width is set to 50 to conform with the beam width of vanilla beam search de
 
 Using this configuration, a character error rate of 8% and a word accuracy of 84% is achieved.
 
-## Train model 
+## Train model
 
 ### IAM dataset
 
