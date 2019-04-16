@@ -1,17 +1,14 @@
 # capstone
-## list of files
-`control.py` - test script that displays live video feed over wifi and allows control of drone via keyboard inputs
+## list of main files
+`ocr/SimpleHTR/src/dronecam.py` - script that creates gui to interface with drone, contains methods to:
+  - `findDistance`  = takes parameters focal, width, pixels
+  - `videoLoop`     = updates frames from drone and processes image
+  - `navigate`      = algorithm to navigate drone towards object
+  - `cropText`      = crops text from screenshot to send to neural net for HTR
+`ocr/SimpleHTR/src/main.py` - hand written text recognition
 ### controls
-  - `return` = takeoff and hover
-  - `q`      = land
-  - `w`      = forward
-  - `s`      = backwards
-  - `a`      = left
-  - `d`      = right
-  - `e`      = up
-  - `c`      = down
-  - `z`      = rotate left
-  - `x`      = rotate right
+  - `q`           = emergency land
+  - `screenshot`  = button starts process of reading text and finding object
 
 # requirements
 `pyardrone 0.6.1` [docs](https://media.readthedocs.org/pdf/pyardrone/latest/pyardrone.pdf) [pip](https://pypi.org/project/pyardrone/)
