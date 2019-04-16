@@ -5,6 +5,7 @@
   - `videoLoop`     = updates frames from drone and processes image
   - `navigate`      = algorithm to navigate drone towards object
   - `cropText`      = crops text from screenshot to send to neural net for HTR
+
 `ocr/SimpleHTR/src/main.py` - hand written text recognition
 ### controls
   - `q`           = emergency land
